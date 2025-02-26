@@ -1,0 +1,24 @@
+public class Main {
+    public Main() {
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
+        String[] languages = new String[]{"C", "C++", "C#", "Python", "Go", "Rust", "JavaScript", "PHP", "Swift", "Java"};
+        int n = (int)(Math.random() * (double)1000000.0F);
+        n *= 3;
+        n += 21;
+        n += 255;
+
+        int sum;
+        for(n *= 6; n > 9; n = sum) {
+            for(sum = 0; n / 10 > 0; n /= 10) {
+                sum += n % 10;
+            }
+
+            sum += n;
+        }
+
+        System.out.println("Willy-nilly, this semester I will learn " + languages[n] + ".");
+    }
+}
