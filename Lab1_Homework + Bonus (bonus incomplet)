@@ -1,0 +1,222 @@
+import java.util.Random;  // Importul necesar pentru a utiliza Random
+
+public class Main {
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.out.println("Va rog dati 2 parametrii, pentru n si pentru k");
+            System.exit(-1);
+        }
+        int n = Integer.parseInt(args[0]);
+        int k = Integer.parseInt(args[1]);
+        int[][] a = new int[n][n];  // Declararea matricei
+        int[] n_clica= new int[k];
+        int[] n_set= new int[k];
+        int[] bonus_n_clica= new int[n];
+        noduri_clica(n, k, n_clica);
+        for(int i=0; i<k; i++)
+            System.out.print(n_clica[i] + " ");
+        System.out.println();
+        noduri_set(n, k, n_clica, n_set);
+        for(int i=0; i<k; i++)
+            System.out.print(n_set[i] + " ");
+        System.out.println();
+        homework(n, k, n_clica, n_set, a);  // Apelarea metodei homework
+        e_clica(1, bonus_n_clica, k, n, a);
+
+        // Afișăm rezultatul
+        if(bonus_n_clica[0]!=-1) {
+            for (int i = 1; i <= k; i++)
+                System.out.print(bonus_n_clica[i] + " ");
+            System.out.println();
+        }
+
+
+
+    }
+
+    // Definirea metodei homework ca statică
+     static void homework(int n, int k, int[] n_clica, int[] n_set,int[][] a) {
+        int i, j, muchii = 0;
+        int[] grad = new int[n]; //Gradul nodurilor (fara diagonala principala)
+
+        Random random = new Random();  // Instanțierea obiectului Random
+
+        // Popularea matricei cu valori 0 sau 1
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < n; j++) {
+                if (i == j) {
+                    a[i][j] = 1;  // Pe diagonala principală punem 1
+                } else if (j > i) {
+                    a[i][j] = random.nextInt(2); // Altele vor fi 0 sau 1
+                    a[j][i] = a[i][j];
+                    if (a[i][j] == 1) {
+                        muchii++;
+                        grad[i]++;
+                        grad[j]++;
+                    }
+                }
+            }
+        }
+
+        if (n_clica[0] != -1)
+        {
+            for (i = 0; i < k; i++) {
+                for (j = i + 1; j < k; j++) {
+                    int nod1 = n_clica[i];
+                    int nod2 = n_clica[j];
+                    int noda = n_set[i];
+                    int nodb = n_set[j];
+
+                    // Adăugăm o muchie între fiecare pereche de noduri din clică
+                    if (a[nod1][nod2] == 0) {
+                        a[nod1][nod2] = 1;
+                        a[nod2][nod1] = 1;
+                        muchii++;
+                        grad[nod1]++;
+                        grad[nod2]++;
+                    }
+                    if (a[noda][nodb] == 1 && ((noda == 0 && nodb != 0) || (noda != 0 && nodb == 0))) {
+                        a[noda][nodb] = 0;
+                        a[nodb][noda] = 0;
+                        muchii--;
+                        grad[noda]--;
+                        grad[nodb]--;
+                    }
+                }
+            }
+    }
+
+        // Afișarea matricei
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < n; j++) {
+                System.out.print(" ");
+                if(a[i][j]==1)
+                System.out.print("● ");  // Afișarea fiecărui element
+                else System.out.print("○ ");  // Afișarea fiecărui element
+            }
+            System.out.println();  // Trecerea la linia următoare după fiecare rând
+        }
+        System.out.println("Numarul de muchii: " + muchii);
+
+        int maxi=0,sum=0;
+        int mini=999999;
+        for (i = 0; i < n; i++) {
+            sum+=grad[i];
+            if(grad[i] > maxi)
+            {maxi=grad[i];}
+            else if(grad[i] < mini)
+            {mini=grad[i];}
+        }
+        System.out.println("Gradul Maxim: \u0394(G) = " + maxi);
+        System.out.println("Gradul Minim: \u03B4(G) = " + mini);
+
+        if(sum==muchii*2)
+        {System.out.println("Suma gradelor nodurilor este egal cu nr muchiilor * 2");}
+        else {System.out.println("Nu este corect");}
+        }
+
+    // Funcția noduri_clica pentru a alege k noduri unice aleatorii
+    static void noduri_clica(int n, int k, int[] n_clica) {
+        Random rand = new Random();
+        int count = 0;
+        if (k > n) {
+            n_clica[0] = -1;
+            System.out.println("k > n deci este imposibil sa avem clica");
+            return;
+        }
+        // Alege k noduri aleatorii distincte
+        {
+            while (count < k) {
+                int nod = rand.nextInt(n);  // Selectează un nod aleatoriu din [0, n-1]
+
+                int ok = 1;  // Presupunem că nodul nu a fost selectat (ok=1)
+
+                // Verifică dacă nodul este deja în vectorul n_clica
+                for (int i = 0; i < count; i++) {
+                    if (n_clica[i] == nod) {
+                        ok = 0;  // Nodul este deja în lista de clică (ok=0)
+                        break;
+                    }
+                }
+
+                // Dacă nodul nu este selectat deja, îl adăugăm în vectorul n_clica
+                if (ok == 1) {
+                    n_clica[count] = nod;
+                    count++;
+                }
+            }
+        }
+    }
+
+    static void noduri_set(int n, int k, int[] n_clica, int[] n_set) {
+        Random rand = new Random();
+        int count = 0;
+        int noduri_clica = 0;
+        if (k > n / 2) {
+            System.out.println("k > n/2 deci este imposibil sa avem set stabil");
+        }
+        // Alege k noduri aleatorii distincte
+        else {
+            while (count < k) {
+                int nod = rand.nextInt(n);  // Selectează un nod aleatoriu din [0, n-1]
+
+                int ok = 1;  // Presupunem că nodul nu a fost selectat (ok=1)
+
+                for (int i = 0; i < k; i++) {
+                    if (n_clica[i] == nod) {
+                        noduri_clica++;
+                        if (noduri_clica > 1) {
+                            noduri_clica--;
+                            ok = 0;  // Nodul este deja în lista de clică (ok=0)
+                            break;
+                        }
+                    }
+                }
+
+
+                // Verifică dacă nodul este deja în vectorul n_clica
+                for (int i = 0; i < count; i++) {
+                    if (n_set[i] == nod) {
+                        ok = 0;  // Nodul este deja în lista de clică (ok=0)
+                        break;
+                    }
+                }
+
+                // Dacă nodul nu este selectat deja, îl adăugăm în vectorul n_clica
+                if (ok == 1) {
+                    n_set[count] = nod;
+                    count++;
+                }
+            }
+        }
+    }
+
+    static void e_clica(int count, int[] bonus_n_clica, int k, int n, int[][] a) {
+        int i, j;
+        if (k > n) {
+            bonus_n_clica[0] = -1;
+            System.out.println("k > n deci este imposibil sa avem clica");
+        } else {
+            for (j = bonus_n_clica[count - 1] + 1; j <= n; j++) {
+                bonus_n_clica[count] = j-1;
+
+                if (k == count) {
+                    int ok = 1;
+                    // Dacă am găsit o combinație validă, o scriem și ieșim
+                    for (i = 1; i < k; i++) {
+                        for (int l = i + 1; l <= k; l++)
+                            if (a[bonus_n_clica[i]][bonus_n_clica[l]] == 0) {
+                                ok = 0;
+                                break;
+                            }
+                    }
+                    if (ok == 1)
+                        return;
+                } else {
+                    e_clica(count + 1, bonus_n_clica, k, n, a);
+                }
+            }
+        }
+    }
+
+    }
